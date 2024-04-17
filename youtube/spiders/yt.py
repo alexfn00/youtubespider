@@ -3,6 +3,8 @@ from pprint import pprint
 import scrapy
 from selenium import webdriver
 
+from youtube.items import YoutubeItem
+
 
 class YtSpider(scrapy.Spider):
     name = "yt"
@@ -21,7 +23,9 @@ class YtSpider(scrapy.Spider):
     def parse(self, response):
         selectors = response.xpath('//*[@id="contents"]')
         for selector in selectors:
-            items = selector.xpath('//a[@id="video-title"]')
-            for item in items:
-                print(item.xpath('./@href').extract_first(), item.xpath('./@title').extract_first())
-
+            videos = selector.xpath('//a[@id="video-title"]')
+            for video in videos:
+                item = YoutubeItem()
+                item['title'] = video.xpath('./@title').extract_first()
+                item['href'] = video.xpath('./@href').extract_first()
+                yield item
