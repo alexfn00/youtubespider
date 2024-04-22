@@ -1,2 +1,9 @@
-*.pyc
 .idea/vcs.xml
+
+.env
+*.pyc
+**/**__pycache__/*.pyc
+
+
+
+

@@ -9,11 +9,17 @@ from youtube.items import YoutubeItem
 class YtSpider(scrapy.Spider):
     name = "yt"
     allowed_domains = ["youtube.com"]
-    start_urls = ["https://www.youtube.com/@BroCodez/video"]
+    # start_urls = ["https://www.youtube.com/@BroCodez/video"]
     models_urls = []
 
-    def __init__(self):
+    def __init__(self,  author='', *args, **kwargs):
+        super(YtSpider, self).__init__(*args, **kwargs)
+        self.start_urls = ['https://www.youtube.com/@'.join(author)]
+
+
         options = webdriver.ChromeOptions()
+        proxy = "127.0.0.1:7890"
+        options.add_argument('--proxy-server=%s' % proxy)
         options.add_argument('--headless')
         self.driver = webdriver.Chrome(options=options)
 
@@ -21,6 +27,10 @@ class YtSpider(scrapy.Spider):
         self.driver.quit()
 
     def parse(self, response):
+        selectors = response.xpath('//*[@id="page-header"]')
+        print(selectors)
+
+    def parse_video(self, response):
         selectors = response.xpath('//*[@id="contents"]')
         for selector in selectors:
             videos = selector.xpath('//a[@id="video-title"]')

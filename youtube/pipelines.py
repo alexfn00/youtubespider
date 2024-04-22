@@ -5,26 +5,69 @@
 
 
 # useful for handling different item types with a single interface
-
-from youtube.items import YoutubeItem
+import redis
 from upstash_redis import Redis
+from typing import Optional
+from youtube.items import YoutubeItem
+# from prisma import Prisma
+from pydantic import BaseModel
 
-KV_REST_API_URL = "https://joint-guinea-50764.upstash.io"
-KV_REST_API_TOKEN = "AcZMASQgNGUyYjhiZGYtOGU5Yi00MjQ2LWJjOTQtZGU0YjEwNTEyYjRkOWY5NmE0OTdhNzE3NGE3YThlMTA4Yjg2ODFlYTVhMTI="
+
+class URLData(BaseModel):
+    url: str
+    title: str
 
 
 class YoutubePipeline:
     def __init__(self):
-        self.redis = Redis(url=KV_REST_API_URL, token=KV_REST_API_TOKEN)
+        # self.client = Prisma()
+        # self.client.connect()
+        pass
+
+    def __del__(self):
+        # self.client.disconnect()
+        pass
+
+    def remove_quotes(self, s):
+        if (s.startswith('"') and s.endswith('"')) or (s.startswith("'") and s.endswith("'")):
+            return s[1:-1]
+        return s
 
     def process_item(self, item, spider):
         if type(item) != YoutubeItem:
             return item
-        self.redis.set(item['href'], item['title'])
+
+        return item
+        key = self.remove_quotes(item['href'])
+        value = self.remove_quotes(item['title'])
+        dto = URLData(url=key, title=value)
+        # print(dto)
+        exists = self.client.url.count(
+            where={
+                'url': key
+            }
+        )
+        print('count=', exists)
+        if exists is False:
+            print('not exists')
+            res = self.client.url.create(data=dto.model_dump(exclude_none=True))
+            print('res:', res)
+        else:
+            print('exists')
+
         return item
 
 
 if __name__ == "__main__":
-    redis = Redis(url=KV_REST_API_URL, token=KV_REST_API_TOKEN)
-    redis.set("a", "b")
-    print(redis.get("a"))
+    try:
+        client = Prisma()
+        client.connect()
+        dto = URLData(url='test1', title='title1')
+        print(dto)
+        res = client.url.create(data=dto.model_dump(exclude_none=True))
+        print(res)
+    except Exception as e:
+        print(e)
+    finally:
+        client.disconnect()
+        print("aaa")
