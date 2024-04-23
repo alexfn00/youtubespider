@@ -5,12 +5,10 @@
 
 
 # useful for handling different item types with a single interface
-import redis
-from upstash_redis import Redis
 from typing import Optional
 from youtube.items import YoutubeItem
-# from prisma import Prisma
 from pydantic import BaseModel
+from prisma import Prisma
 
 
 class URLData(BaseModel):
@@ -20,12 +18,12 @@ class URLData(BaseModel):
 
 class YoutubePipeline:
     def __init__(self):
-        # self.client = Prisma()
-        # self.client.connect()
+        self.client = Prisma()
+        self.client.connect()
         pass
 
     def __del__(self):
-        # self.client.disconnect()
+        self.client.disconnect()
         pass
 
     def remove_quotes(self, s):
@@ -37,11 +35,13 @@ class YoutubePipeline:
         if type(item) != YoutubeItem:
             return item
 
-        return item
+        # print(item)
+        # return item
+        print(item)
         key = self.remove_quotes(item['href'])
         value = self.remove_quotes(item['title'])
         dto = URLData(url=key, title=value)
-        # print(dto)
+        print(dto)
         exists = self.client.url.count(
             where={
                 'url': key

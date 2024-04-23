@@ -91,6 +91,8 @@ class YoutubeDownloaderMiddleware:
         driver = spider.driver
         # if request.url in spider.models_urls:
         driver.get(request.url)
+        print('333333333333333333333333333333333333333333')
+        print(request.url)
         asyncio.sleep(1)
         page_text = driver.page_source
         new_response = HtmlResponse(url=request.url, body=page_text, encoding='utf-8', request=request)

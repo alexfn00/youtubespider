@@ -8,5 +8,6 @@ import scrapy
 
 class YoutubeItem(scrapy.Item):
     # define the fields for your item here like:
+    author = scrapy.Field()
     title = scrapy.Field()
     href = scrapy.Field()
